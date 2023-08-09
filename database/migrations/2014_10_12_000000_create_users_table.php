@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('username')->unique()->nullable();
             $table->boolean('update_username')->default(0);
             $table->string('mobile')->nullable();   
+            
             $table->string('mobile_verifed_at')->nullable();
             $table->string('password');
             $table->string('profile_url')->nullable();
