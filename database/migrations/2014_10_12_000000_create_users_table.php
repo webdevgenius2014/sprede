@@ -18,6 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('name');
             $table->string('username')->unique()->nullable();
+            $table->boolean('update_username')->default(0);
             $table->string('mobile')->nullable();   
             $table->string('mobile_verifed_at')->nullable();
             $table->string('password');
