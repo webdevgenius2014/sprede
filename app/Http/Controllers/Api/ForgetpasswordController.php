@@ -9,6 +9,7 @@ use Validator;
 use Mail;
 use Carbon\Carbon;
 use Auth;
+use Hash;
 
 
 class ForgetpasswordController extends Controller
@@ -52,7 +53,8 @@ class ForgetpasswordController extends Controller
         {
             $validator = Validator::make($request->all(), [
                 'email' => 'required|email',
-                'otp' =>'required|digits:6'
+                'otp' =>'required|digits:6',
+                'password' => 'required|string|confirmed|min:6',
             ]);
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
@@ -63,6 +65,7 @@ class ForgetpasswordController extends Controller
                 if($user->email_otp == $request->otp)
                 {
                     $user->email_verified_at = Carbon::now();
+                    $user->password = Hash::make($request->password);
                     $user->save();
                     $token = Auth::login($user);
                     return response()->json(['success' => false, 'message' => 'Email verified successfully','data' => $user,'access_token'=>$token], 200)->header('status', 200);
