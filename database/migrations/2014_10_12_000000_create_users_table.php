@@ -19,11 +19,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('username')->unique()->nullable();
             $table->boolean('update_username')->default(0);
-            $table->string('mobile')->nullable();   
+            $table->string('mobile')->unique()->nullable();   
             $table->string('mobile_verifed_at')->nullable();
             $table->string('password');
             $table->string('profile_url')->nullable();
-            $table->string('expires_in')->nullable();      
+            $table->string('email_otp_expires_in')->nullable(); 
             $table->string('terms')->nullable();      
             $table->string('new_updates')->nullable();      
             $table->rememberToken();
