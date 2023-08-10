@@ -33,9 +33,6 @@ Route::group([
 Route::namespace("App\Http\Controllers\Api")->middleware('api')->group(function(){
     Route::post('/send-otp','ForgetpasswordController@sendOtp');
     Route::post('/verify-otp','ForgetpasswordController@verifyOtp');
-});
-
 //User Module api
-Route::namespace("App\Http\Controllers\Api")->middleware('api')->group(function(){
     Route::post('/update-demographic-info','UserController@updateDemographic');
 });
