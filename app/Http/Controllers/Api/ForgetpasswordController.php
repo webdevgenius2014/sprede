@@ -36,7 +36,7 @@ class ForgetpasswordController extends Controller
                     $message->subject('verification for Forgot Password.');
                 });
 
-                return response()->json(['success' => false, 'message' => 'OTP send for verification'], 200)->header('status', 200);
+                return response()->json(['success' => true, 'message' => 'OTP send for verification'], 200)->header('status', 200);
             }else{
                 return response()->json(['success' => false, 'message' => 'User does not exist'], 404)->header('status', 404);
             }
@@ -68,7 +68,7 @@ class ForgetpasswordController extends Controller
                     $user->password = Hash::make($request->password);
                     $user->save();
                     $token = Auth::login($user);
-                    return response()->json(['success' => false, 'message' => 'Email verified successfully','data' => $user,'access_token'=>$token], 200)->header('status', 200);
+                    return response()->json(['success' => true, 'message' => 'Email verified successfully','data' => $user,'access_token'=>$token], 200)->header('status', 200);
                 }else{
                     return response()->json(['success' => false, 'error' => 'Invalid OTP'], 422)->header('status', 422);
                 }
