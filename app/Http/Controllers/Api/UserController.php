@@ -35,7 +35,7 @@ class UserController extends Controller
                   $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
                   $extension = $request->file('profile_img')->getClientOriginalExtension();
                   $uploadProfileImage=$filename.'.'.$extension;
-                  $path = $request->file('profile_img')->move('public/', $uploadProfileImage);
+                  $path = $request->file('profile_img')->move('public/images', $uploadProfileImage);
                   $uploadProfile= $path;
                 }
 
@@ -45,7 +45,7 @@ class UserController extends Controller
                   $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
                   $extension = $request->file('cover_img')->getClientOriginalExtension();
                   $uploadCoverImage=$filename.'.'.$extension;
-                  $path = $request->file('cover_img')->move('public/', $uploadCoverImage);
+                  $path = $request->file('cover_img')->move('public/images', $uploadCoverImage);
                   $uploadCover= $path;
                 }
                 $saveinfo = new DemographicInfo();        
