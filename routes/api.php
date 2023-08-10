@@ -28,3 +28,10 @@ Route::group([
     Route::post('/refresh', [AuthController::class, 'refresh']);
     Route::get('/user-profile', [AuthController::class, 'userProfile']);    
 });
+
+Route::namespace("App\Http\Controllers\Api")->middleware('api')->group(function(){
+
+    Route::post('/send-otp','ForgetpasswordController@sendOtp');
+    Route::post('/verify-otp','ForgetpasswordController@verifyOtp');
+    
+});
