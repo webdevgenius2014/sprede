@@ -24,8 +24,8 @@ return new class extends Migration
             $table->string('password');
             $table->string('profile_url')->nullable();
             $table->string('email_otp_expires_in')->nullable(); 
-            $table->string('terms')->nullable();      
-            $table->string('new_updates')->nullable();      
+            $table->enum('terms', ['0', '1'])->default('0')->nullable();
+            $table->enum('news_updates', ['0', '1'])->default('0')->nullable(); ;      
             $table->rememberToken();
             $table->timestamps();
         });
