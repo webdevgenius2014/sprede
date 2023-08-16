@@ -63,13 +63,12 @@ class AuthController extends Controller
                     'email.unique' => 'Mobile number already taken.'
                 ]
             );
-        }else{
-            if(filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
+        }elseif(filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
                 $email = $data['email'];
                 // dd("yes");
                 $validator = Validator::make($request->all(), 
                 [
-                    'email' => 'required|string|email|max:100|unique:users',
+                    'email' => 'required|string|email:rfc,dns|max:100|unique:users',
                     'name' => 'required|string|between:2,100',
                     'password' => 'required|string|confirmed|min:6',
                     'terms' => 'required'
@@ -77,17 +76,20 @@ class AuthController extends Controller
                 [
                     'email.required' => 'Email or Phone number is required.'
                 ]);
-            }else{
-                $validator = Validator::make($request->all(), 
-                [
-                    'email' => 'required|string|email|max:100|unique:users',
-                    'name' => 'required|string|between:2,100',
-                    'password' => 'required|string|confirmed|min:6',
-                    'terms' => 'required'
-                ], 
-                [
-                    'email.required' => 'Email or Phone number is required.'
-                ]);
+        }else{
+            $validator = Validator::make($request->all(), 
+            [
+                'email' => 'required|string|email:rfc,dns|max:100|unique:users',
+                'name' => 'required|string|between:2,100',
+                'password' => 'required|string|confirmed|min:6',
+                'terms' => 'required'
+            ], 
+            [
+                'email.required' => 'Email or Phone number is required.',
+                'email.email' => 'Please provide correct email address.'
+            ]);
+            if($validator->fails()){
+                return response()->json($validator->errors(), 400);
             }
         }
 
@@ -231,40 +233,19 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function userProfile(Request $request) {
-
-        // if(auth()->user()){
-        //     // dd("yes");
-        //     if($request->bearerToken()){
-        //         return response()->json(['status'=>200, 
-        //             'message' => 'success',
-        //             'data' => auth()->user()
-        //         ]);
-        //     }else{
-        //         return response()->json(['status' => 400,
-        //                                 'message' => 'failed',
-        //                             ]);
-        //     }
-        // }else{
-        //     dd("no");
-        //     // dd(auth()->check());
-        //     return response()->json(['status' => 400,
-        //                              'message' => 'failed',
-        //                              'data' => 'Please Login to access'
-        //                             ]);
-        // }
-
-        if(auth()->user() && $request->bearerToken()){
+    
+        // if(auth()->user() && $request->bearerToken()){
 
             return response()->json(['status'=>200, 
                                      'message' => 'success',
                                      'data' => auth()->user()
                                     ]);
-        }else{
-            return response()->json(['status' => 400,
-                                     'message' => 'failed',
-                                     'data' => 'Please Login to access'
-                                    ]);
-        } 
+        // }else{
+        //     return response()->json(['status' => 400,
+        //                              'message' => 'failed',
+        //                              'data' => 'Please Login to access'
+        //                             ]);
+        // } 
     }
     /**
      * Get the token array structure.
@@ -283,4 +264,8 @@ class AuthController extends Controller
             'user' => auth()->user()
         ]);
     }
+
+    // public function login_view(){
+    //     dd("in login view");
+    // }
 }
