@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactInfoController;
+use App\Http\Controllers\Api\UserController; //Demographic_info_controller
 
 /*
 |--------------------------------------------------------------------------
@@ -34,5 +35,19 @@ Route::group([
     
     //Contact Info Routes
     Route::post('/contact-info', [ContactInfoController::class, 'contact_info']);
-    // Route::post('/username', [ContactInfoController::class, 'get_username']);
+   
+    // Demographic info
+    // Route::post('/update-demographic-info','UserController@updateDemographic');
+    Route::post('/demographic-info', [UserController::class, 'updateDemographic']);
+    Route::post('/get-username', [ContactInfoController::class, 'get_username']);
+    Route::post('/store-username', [ContactInfoController::class, 'store_username']);
+
+});
+
+// Forgot Password Module api
+Route::namespace("App\Http\Controllers\Api")->middleware('api')->group(function(){
+    Route::post('/send-otp','ForgetpasswordController@sendOtp');
+    Route::post('/verify-otp','ForgetpasswordController@verifyOtp');
+//User Module api
+    // Route::post('/update-demographic-info','UserController@updateDemographic');
 });

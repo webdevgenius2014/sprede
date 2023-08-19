@@ -11,14 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contact_infos', function (Blueprint $table) {
+        Schema::create('demographic_infos', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
-            $table->string('permanent_add_city')->nullable();
-            $table->string('permanent_add_country')->nullable();
-            $table->enum('same_as_permanent_add', ['0', '1'])->default('0');
-            $table->string('current_add_city')->nullable();
-            $table->string('current_add_country')->nullable();            
+            $table->string('first_name')->nullable();
+            $table->string('middle_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('about_me')->nullable();
+            $table->string('dob')->nullable();
+            $table->enum('gender', ['male', 'female','other']);
+            $table->string('profile_img')->nullable();
+            $table->string('cover_img')->nullable();
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
@@ -29,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contact_infos');
+        Schema::dropIfExists('demographic_infos');
     }
 };

@@ -33,11 +33,13 @@ class AuthController extends Controller
         $data = $request->all();
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
+            'name' => 'required|regex:/^[a-zA-Z\s]*$/',
             'email' => 'required',
             'password' => 'required|confirmed',
             'password_confirmation' => 'required',
             'terms' => 'required'
+        ],[
+            'email.required' => 'Email or Phone number is required.',
         ]);
 
         if($validator->fails()){
@@ -217,7 +219,11 @@ class AuthController extends Controller
      */
     public function logout() {
         auth()->logout();
-        return response()->json(['message' => 'User successfully signed out']);
+        return response()->json([
+                                'status'=>200,
+                                'message' => 'User successfully signed out',
+                                'user' => auth()->user()
+                            ]);
     }
     /**
      * Refresh a token.
