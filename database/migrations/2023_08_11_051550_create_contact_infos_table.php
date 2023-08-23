@@ -16,7 +16,7 @@ return new class extends Migration
             $table->integer('user_id')->unsigned();
             $table->string('permanent_add_city')->nullable();
             $table->string('permanent_add_country')->nullable();
-            $table->enum('same_as_permanent_add', ['0', '1'])->default('0');
+            $table->boolean('same_as_permanent_add')->default('0');
             $table->string('current_add_city')->nullable();
             $table->string('current_add_country')->nullable();            
             $table->timestamps();

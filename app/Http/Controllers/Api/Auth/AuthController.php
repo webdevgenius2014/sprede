@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -37,9 +37,10 @@ class AuthController extends Controller
             'email' => 'required',
             'password' => 'required|confirmed',
             'password_confirmation' => 'required',
-            'terms' => 'required'
+            'terms' => 'required|in:1'
         ],[
             'email.required' => 'Email or Phone number is required.',
+            'terms.in' => 'Please accept Terms and Conditions.'
         ]);
 
         if($validator->fails()){
@@ -56,13 +57,14 @@ class AuthController extends Controller
                     'email' => 'required|digits:10|numeric|unique:users,mobile',
                     'name' => 'required|string|between:2,100',
                     'password' => 'required|string|confirmed|min:6',
-                    'terms' => 'required'
+                    'terms' => 'required|in:1'
                 ],
                 [
                     'email.required' => 'Email or Phone number is required.',
                     'email.numeric' => 'Phone number must be numeric.',
                     'email.digits' => 'Phone number must be of 10 digits.',
-                    'email.unique' => 'Mobile number already taken.'
+                    'email.unique' => 'Mobile number already taken.',
+                    'terms.in' => 'Please accept Terms and Conditions.'
                 ]
             );
         }elseif(filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
@@ -73,10 +75,11 @@ class AuthController extends Controller
                     'email' => 'required|string|email:rfc,dns|max:100|unique:users',
                     'name' => 'required|string|between:2,100',
                     'password' => 'required|string|confirmed|min:6',
-                    'terms' => 'required'
+                    'terms' => 'required|in:1'
                 ], 
                 [
-                    'email.required' => 'Email or Phone number is required.'
+                    'email.required' => 'Email or Phone number is required.',
+                    'terms.in' => 'Please accept Terms and Conditions.'
                 ]);
         }else{
             $validator = Validator::make($request->all(), 
@@ -84,11 +87,12 @@ class AuthController extends Controller
                 'email' => 'required|string|email:rfc,dns|max:100|unique:users',
                 'name' => 'required|string|between:2,100',
                 'password' => 'required|string|confirmed|min:6',
-                'terms' => 'required'
+                'terms' => 'required|in:1'
             ], 
             [
                 'email.required' => 'Email or Phone number is required.',
-                'email.email' => 'Please provide correct email address.'
+                'email.email' => 'Please provide correct email address.',
+                'terms.in' => 'Please accept Terms and Conditions.'
             ]);
             if($validator->fails()){
                 return response()->json($validator->errors(), 400);
@@ -100,7 +104,7 @@ class AuthController extends Controller
         }
 
         if (!array_key_exists("news_updates", $data)) {
-           $data['news_updates'] = '0';
+           $data['news_updates'] = 0;
         }
 
         $user = User::create([
@@ -198,13 +202,13 @@ class AuthController extends Controller
             return response()->json([
                             'error' => 'Unauthorized',
                             'status' => 400,
-                            'message' => 'failed',
+                            'message' => 'Please check your login credentials.',
                         ], 401);
         }
 
-        if (! $token = auth()->login($user)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+        // if (! $token = auth()->login($user)) {
+        //     return response()->json(['error' => 'Unauthorized'], 401);
+        // }
         // if (! $token = auth()->attempt($validator->validated())) {
         //     return response()->json(['error' => 'Unauthorized'], 401);
         // }
@@ -240,18 +244,10 @@ class AuthController extends Controller
      */
     public function userProfile(Request $request) {
     
-        // if(auth()->user() && $request->bearerToken()){
-
-            return response()->json(['status'=>200, 
-                                     'message' => 'success',
-                                     'data' => auth()->user()
-                                    ]);
-        // }else{
-        //     return response()->json(['status' => 400,
-        //                              'message' => 'failed',
-        //                              'data' => 'Please Login to access'
-        //                             ]);
-        // } 
+        return response()->json(['status'=>200, 
+                                 'message' => 'success',
+                                 'data' => auth()->user()
+                               ]);
     }
     /**
      * Get the token array structure.

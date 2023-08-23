@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ class ContactInfoController extends Controller
     //     $this->middleware('auth:api');
     // }
     
-    public function contact_info(Request $request){
+    public function contactInfo(Request $request){
         $data = $request->all();
 
         $validator = Validator::make($request->all(), [
@@ -24,8 +24,8 @@ class ContactInfoController extends Controller
         ]);
 
         // $same_as_permanent_add = array_key_exists('same_as_permanent_add', $data);
-
-        if($request->has('same_as_permanent_add') && ($request->same_as_permanent_add == null || $request->same_as_permanent_add == '0' )){
+        // $request->has('same_as_permanent_add') && ()
+        if($request->has('same_as_permanent_add') && ($request->same_as_permanent_add == null || $request->same_as_permanent_add == "0" )){
             $validator = Validator::make($request->all(), [
                 'current_add_city' => 'required',
                 'current_add_country' => 'required',
@@ -38,7 +38,7 @@ class ContactInfoController extends Controller
             $contact_info->user_id = auth()->id();
             $contact_info->permanent_add_city = $request->permanent_add_city;
             $contact_info->permanent_add_country = $request->permanent_add_country;
-            if($request->has('same_as_permanent_add') && ($request->same_as_permanent_add == null || $request->same_as_permanent_add == '0' )){
+            if($request->has('same_as_permanent_add') && ($request->same_as_permanent_add == null || $request->same_as_permanent_add == "0" )){
                 $contact_info->same_as_permanent_add = '0';
                 $contact_info->current_add_city = $request->current_add_city;
                 $contact_info->current_add_country = $request->current_add_country;
@@ -56,11 +56,22 @@ class ContactInfoController extends Controller
             ]);
         }
     }
-
-    public function get_username(Request $request){
+    // getUsername function for getting valid and available usernames(ajax) // 
+    public function getUsername(Request $request){
         $data = $request->all();
-
         $user_id = auth()->user()->id;
+        $user = User::find($user_id);
+
+        if($user->update_username == '1' || $user->username != null){
+            return response()->json([
+                'status' => 400,
+                'success' => 'failed',
+                'message' => 'You have already chosen the username.'
+            ]);
+        }
+                
+        $username = $data['username'];
+        $username = str_replace(' ', '', $username);
 
         $validate_require = Validator::make($data, [
             'username' => 'required'
@@ -82,8 +93,8 @@ class ContactInfoController extends Controller
                 if($user_demographic->last_name){
                     $first_name = $user_demographic->first_name;
                     $last_name = $user_demographic->last_name;
-                    $fix_suggest_username[0] = $this->generate_username($first_name.$last_name);
-                    $fix_suggest_username[1] = $this->generate_username($first_name."_".$last_name);
+                    $fix_suggest_username[0] = $this->generate_username($first_name.$last_name, []);
+                    $fix_suggest_username[1] = $this->generate_username($first_name."_".$last_name, []);
                 }
             }
         }
@@ -93,23 +104,22 @@ class ContactInfoController extends Controller
             $index = 2;
         }
         // $suggest_username = [];
-        
-        $username = $data['username'];
 
         if($validate->fails()){
 
             for($i=$index; $i<=5; $i++){
-                $fix_suggest_username[$i] = $this->generate_username($username);
+
+                $fix_suggest_username[$i] = $this->generate_username($username, $fix_suggest_username->toArray());
                 // array_push($suggest_username, $this->generate_username($username));
             }
             return response()->json([$validate->errors(),
-                                    'suggestions' => $fix_suggest_username,
+                                        'suggestions' => $fix_suggest_username,
                                     ], 400);
         }
         // $sggestion_without_error = [];
 
         for($i=$index; $i<=5; $i++){
-            $fix_suggest_username[$i] = $this->without_error_generate_username($username);
+            $fix_suggest_username[$i] = $this->without_error_generate_username($username, $fix_suggest_username->toArray());
             // array_push($sggestion_without_error, $this->without_error_generate_username($username));
         }
 
@@ -120,55 +130,67 @@ class ContactInfoController extends Controller
         ]);
     }
 
-    public function generate_username($name){
+    // generate_username function return unique usernames if you got any error on getUsername function
+    public function generate_username($name, $array){
         $username = $name;
-        if(User::where('username', '=', $name)->exists()){
-            $uniqueUserName = $name.rand(10, 99);
-            $username = $this->generate_username($uniqueUserName);
+        // dd($array);
+        if(in_array($username, $array)){
+            // dd("yes in array", $array);
+            $uniqueUserName = $username.rand(0, 99);
+            $username = $this->generate_username($uniqueUserName, $array);
+        }elseif(User::where('username', '=', $name)->exists()){
+            $uniqueUserName = $name.rand(0, 99);
+            $username = $this->generate_username($uniqueUserName, $array);
         }
         return $username;
     }
 
-    public function without_error_generate_username($name){
+    // generate_username function return unique usernames if you have valid username getUsername function
+    public function without_error_generate_username($name, $array){
         $username = $name.rand(0, 99);
-        if(User::where('username', '=', $username)->exists()){
-            $uniqueUserName = $name.rand(10, 99);
+        // print_r($array);
+        if(in_array($username, $array)){
+            $uniqueUserName = $username.rand(0, 99);
+            $username = $this->without_error_generate_username($uniqueUserName, $array);
+        }elseif(User::where('username', '=', $username)->exists()){
+            $uniqueUserName = $name.rand(0, 99);
             $username = $this->without_error_generate_username($uniqueUserName);
         }
         return $username;
     }
 
-    public function store_username(Request $request){
-        $data =$request->all();
+    public function storeUsername(Request $request){
+        $data = $request->all();
+        
+        $user_id = auth()->user()->id;
+        $user = User::find($user_id);
+
+        if($user->update_username == '1' || $user->username != null){
+            return response()->json([
+                'status' => 400,
+                'success' => 'failed',
+                'message' => 'You have already chosen the username.'
+            ]);
+        }
 
         $validate = Validator::make($data, [
             'username' => 'required|unique:users|min:5|regex:/^[A-Za-z0-9_]+$/'
         ]);
+
         if($validate->fails()){
             return response()->json([
                 'status' => "failed",
                 'message' => $validate->errors()
             ], 400);
         }else{
-            $user_id = auth()->user()->id;
-            $user = User::find($user_id);
-            if($user->update_username == '0'){
-                $user->username = $data['username'];
-                $user->update_username = '1';
-                if($user->save()){
-                    return response()->json([
-                        'status' => 'success',
-                        'message' => 'Username Updated successfully.'
-                    ], 200);
-                }
-            }else{
+            $user->username = $data['username'];
+            $user->update_username = '1';
+            if($user->save()){
                 return response()->json([
-                    'status' => 'failed',
-                    'message' => 'You can\'t update your username.'
-                ], 400);
-            }
-            
-            
+                    'status' => 'success',
+                    'message' => 'Username Updated successfully.'
+                ], 200);
+            }            
         }
     }
 

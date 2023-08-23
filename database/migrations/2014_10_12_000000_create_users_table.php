@@ -18,14 +18,14 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('name');
             $table->string('username')->unique()->nullable();
-            $table->enum('update_username', ['0', '1'])->default(0);
+            $table->boolean('update_username')->default(0);
             $table->string('mobile')->unique()->nullable();   
             $table->string('mobile_verifed_at')->nullable();
             $table->string('password');
             $table->string('profile_url')->nullable();
             $table->string('email_otp_expires_in')->nullable(); 
-            $table->enum('terms', ['0', '1'])->default('0')->nullable();
-            $table->enum('news_updates', ['0', '1'])->default('0')->nullable(); ;      
+            $table->boolean('terms')->default('0')->nullable();
+            $table->boolean('news_updates')->default('0')->nullable(); ;      
             $table->rememberToken();
             $table->timestamps();
         });

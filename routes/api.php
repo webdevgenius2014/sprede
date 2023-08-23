@@ -2,9 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ContactInfoController;
-use App\Http\Controllers\Api\UserController; //Demographic_info_controller
+use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\Auth\ContactInfoController;
+use App\Http\Controllers\Api\Auth\UserController; //Demographic_info_controller
+use App\Http\Controllers\Api\Auth\EmploymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,13 +35,17 @@ Route::group([
     // Route::get('/login-view', [AuthController::class, 'login_view'])->name('login');
     
     //Contact Info Routes
-    Route::post('/contact-info', [ContactInfoController::class, 'contact_info']);
+    Route::post('/contact-info', [ContactInfoController::class, 'contactInfo']);
    
     // Demographic info
-    // Route::post('/update-demographic-info','UserController@updateDemographic');
     Route::post('/demographic-info', [UserController::class, 'updateDemographic']);
-    Route::post('/get-username', [ContactInfoController::class, 'get_username']);
-    Route::post('/store-username', [ContactInfoController::class, 'store_username']);
+    //Contact Info and username
+    // Route::post('/update-demographic-info','UserController@updateDemographic');
+    Route::post('/get-username', [ContactInfoController::class, 'getUsername']);
+    Route::post('/store-username', [ContactInfoController::class, 'storeUsername']);
+
+    //Employment info
+    Route::post('/store-employment-info', [EmploymentController::class, 'storeEmploymentInfo']);
 
 });
 
