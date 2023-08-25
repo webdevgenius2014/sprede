@@ -6,38 +6,60 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SubInterest;
 use App\Models\Interest;
-use DB;
+use App\Models\UserInterest;
+// use DB;
 
 class InterestController extends Controller
 {
     public function getInterest(){
-        \DB::enableQueryLog(); // Enable query log
-
-        // Your Eloquent query executed by using get()
-
-        //$sub_interest = SubInterest::where('default_sub_cat', 1)->with('interest')->get()->toArray();
-        // $interests = Interest::with('subInterest', function ($query) {
-        //     $query->where('default_sub_cat', '1');
-        // })->get()->toArray();
-
-        $interests = Interest::whereHas('subInterest', function ($query) {
-            $query->where('default_sub_cat', '1');
-        })->with('subInterest')->get()->toArray();
-
-        // $posts = Interest::whereHas('subInterest', function ($query) {
-        //     $query->where('default_sub_cat', '1');
+        // \DB::enableQueryLog(); // Enable query log
+        // $interests = Interest::whereHas('subInterest', function ($query) {
+        //     $query->select()->where('default_sub_cat', '1');
         // })->with('subInterest')->get()->toArray();
-            // dd($posts);
+        // dd(\DB::getQueryLog()); 
+        $interests = Interest::with('default_sub_cat')->get()->toArray();
 
-        $posts = Interest::join('sub_interests', 'interests.id', '=', 'sub_interests.interest_id')
-                            ->where('sub_interests.default_sub_cat', '1')->with('subInterest')->get()->toArray();
+        if($interests){
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+                'data' => $interests
+            ]);
+        }else{
+            return response()->json([
+                'status' => 400,
+                'message' => 'Failed', 
+            ]);
+        }
+    }
+
+    public function storeSubDefaultInterest(Request $req){
+       
+        $data = $req->all();
+        $sub_interest = SubInterest::create([
+            'interest_id' => $data['interest_id'],
+            'user_id' => auth()->user()->id,
+            'default_sub_cat' => 0,
+            'name' => $data['name']
+        ]);
+
+        // $user_interest = UserInterest::create([
+        //     'user_id' => auth()->user()->id,
+        //     'sub_interest_id' => $sub_interest->id
+        // ]);
+
+        if($sub_interest){
+            return response()->json([
+                'success' => 200,
+                'message' => 'success',
+                'data' => $sub_interest
+            ]);
+        }else{
+            return response()->json([
+                'success' => 400,
+                'message' => 'failed',
+            ]);
+        }
         
-        dd($posts);
-        // ['interests.*', 'sub_interests.*']
-        
-        dd(\DB::getQueryLog()); 
-
-        // $posts = Interest::with('subInterest')->get()->toArray();
-
     }
 }

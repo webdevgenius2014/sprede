@@ -15,4 +15,13 @@ class Interest extends Model
     public function subInterest(){
         return $this->hasMany(SubInterest::class);
     }
+
+    public function default_sub_cat() {
+        return $this->subInterest()->where('default_sub_cat', '=', 1);
+    }
+
+    public function default_subInterest() {
+        return $this->hasMany(SubInterest::class)->where('default_sub_cat', '=', 1);
+    }
+
 }

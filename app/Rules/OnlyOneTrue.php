@@ -21,12 +21,22 @@ class OnlyOneTrue implements ValidationRule
     // }
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        $get_requested_validate_from = explode(".", $attribute, 2);
+        // dd($get_requested_validate_from);
         if($value == 1){
             $this->propertyToCheck++;
         }
-        // echo $this->propertyToCheck;
-        if($this->propertyToCheck > 1 ){
-            $fail('You can work in one organisation at a time.');
+
+        if($get_requested_validate_from[0] == 'education'){
+            if($this->propertyToCheck > 1 ){
+                $fail('You can\'t pursue more than one education at a time.');
+            }
         }
+        // echo $this->propertyToCheck;
+        if($get_requested_validate_from[0] == 'organisation'){
+            if($this->propertyToCheck > 1 ){
+                $fail('You can\'t work in one organisation at a time.');
+            }
+        }   
     }
 }

@@ -20,4 +20,5 @@ class SubInterest extends Model
     public function interest(){
         return $this->belongsTo(Interest::class, 'interest_id');
     }
+
 }

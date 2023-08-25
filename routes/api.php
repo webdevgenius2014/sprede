@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Auth\ContactInfoController;
 use App\Http\Controllers\Api\Auth\UserController; //Demographic_info_controller
 use App\Http\Controllers\Api\Auth\EmploymentController;
 use App\Http\Controllers\Api\Auth\InterestController;
+use App\Http\Controllers\Api\Auth\EductionInfoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,7 +49,13 @@ Route::group([
     //Employment info
     Route::post('/store-employment-info', [EmploymentController::class, 'storeEmploymentInfo']);
 
-    Route::get('/get-interests', [InterestController::class, 'getInterest']);
+    //Interests Setting
+    Route::get('/get-interests', [InterestController::class, 'getInterest']);   
+    Route::post('/store-interests', [InterestController::class, 'storeSubDefaultInterest']);
+
+    // Eductaion Info
+    Route::post('store-education-info', [EductionInfoController::class, 'storeEduction']);
+    
 
 });
 
