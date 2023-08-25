@@ -4,4 +4,5 @@
 # run composer update command
 # run command php artisan jwt:secret
 # run command php artisan migrate under project
+# run command php artisan db:seed under project
 # export postman collection in postman

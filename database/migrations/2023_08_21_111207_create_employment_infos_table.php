@@ -20,11 +20,11 @@ return new class extends Migration
             $table->string('designation')->nullable();
             $table->string('from')->nullable();
             $table->string('to')->nullable();
-            $table->boolean('current_work_here')->default(0);
+            $table->boolean('current_work_here')->default('0');
             $table->string('org_city')->nullable();
             $table->string('org_country')->nullable();
             $table->timestamps();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); //On user delete this data will be also deleted
         });
     }
 

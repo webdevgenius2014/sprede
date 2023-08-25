@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('profile_img')->nullable();
             $table->string('cover_img')->nullable();
             $table->timestamps();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); //On user delete this data will be also deleted
         });
     }
 

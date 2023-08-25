@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\ContactInfoController;
 use App\Http\Controllers\Api\Auth\UserController; //Demographic_info_controller
 use App\Http\Controllers\Api\Auth\EmploymentController;
+use App\Http\Controllers\Api\Auth\InterestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,8 @@ Route::group([
 
     //Employment info
     Route::post('/store-employment-info', [EmploymentController::class, 'storeEmploymentInfo']);
+
+    Route::get('/get-interests', [InterestController::class, 'getInterest']);
 
 });
 

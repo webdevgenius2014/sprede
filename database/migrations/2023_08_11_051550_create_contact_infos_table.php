@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('current_add_city')->nullable();
             $table->string('current_add_country')->nullable();            
             $table->timestamps();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); //On user delete this data will be also deleted
         });
     }
 
