@@ -257,6 +257,7 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     protected function createNewToken($token){
+        // dd(auth()->factory()->getTTL() * 60);
         return response()->json([
             'status' => 200,
             'message' => 'success',

@@ -69,19 +69,20 @@ class ContactInfoController extends Controller
                 'message' => 'You have already chosen the username.'
             ]);
         }
+
+        $validate = Validator::make($data, [
+            'username' => 'required|unique:users|min:5'
+        ]);
+
+        if($validate->fails()){
+            return response()->json([$validate->errors()], 400);
+        }
                 
         $username = $data['username'];
         $username = str_replace(' ', '', $username);
-
-        $validate_require = Validator::make($data, [
-            'username' => 'required'
-        ]);
-        if($validate_require->fails()){
-            return response()->json([$validate_require->errors()], 400);
-        }
         
         $validate = Validator::make($data, [
-            'username' => 'required|unique:users|min:5|regex:/^[A-Za-z0-9_]+$/'
+            'username' => 'regex:/^[A-Za-z0-9_]+$/'
         ],[
             'username.regex' => "Please enter valid username with letters, numbers and underscores."
         ]);
@@ -188,7 +189,8 @@ class ContactInfoController extends Controller
             if($user->save()){
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Username Updated successfully.'
+                    'message' => 'Username Updated successfully.',
+                    'data' => $user
                 ], 200);
             }            
         }

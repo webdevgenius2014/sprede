@@ -35,7 +35,7 @@ class OnlyOneTrue implements ValidationRule
         // echo $this->propertyToCheck;
         if($get_requested_validate_from[0] == 'organisation'){
             if($this->propertyToCheck > 1 ){
-                $fail('You can\'t work in one organisation at a time.');
+                $fail('You can\'t work in more than one organisation at a time.');
             }
         }   
     }

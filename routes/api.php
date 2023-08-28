@@ -50,8 +50,10 @@ Route::group([
     Route::post('/store-employment-info', [EmploymentController::class, 'storeEmploymentInfo']);
 
     //Interests Setting
-    Route::get('/get-interests', [InterestController::class, 'getInterest']);   
-    Route::post('/store-interests', [InterestController::class, 'storeSubDefaultInterest']);
+    Route::get('/get-interests', [InterestController::class, 'getDefaultInterest']);   
+    Route::post('/add-sub-interests', [InterestController::class, 'storeSubDefaultInterestByUser']);
+    Route::post('/store-interests', [InterestController::class, 'storeUserInterest']);
+    
 
     // Eductaion Info
     Route::post('store-education-info', [EductionInfoController::class, 'storeEduction']);
