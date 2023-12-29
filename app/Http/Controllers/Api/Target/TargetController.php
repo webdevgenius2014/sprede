@@ -13,17 +13,37 @@ use Validator;
 
 class TargetController extends Controller
 {
-    public function all(){
-       
-        $targets = Target::with(['interest' => function ($query) {
-            $query->select('id', 'name');
-        }, 'sub_interest' => function($query){
-            $query->select('id', 'name');
-        }, 'user'])->get();
+    public function index(Request $req){
+        $org_id = $req->org_id;
+
+        if($org_id){
+            $targets = Target::with(['interest' => function ($query) {
+                $query->select('id', 'name');
+            }, 'sub_interest' => function($query){
+                $query->select('id', 'name');
+            }, 'user', 'event:id,name,category,location,event_date,start_time,meridiem,cover_photo,target_id'])
+            ->where('organization_id', $org_id)->paginate(10);
+        }else{
+            $targets = Target::select('id', 'interest_id', 'sub_interest_id', 'title', 'from', 'to', 'description', 'incentive_prize', 'target_unique_id')
+                            ->with(['interest' => function ($query) {
+                                        $query->select('id', 'name');
+                                    }, 'sub_interest' => function($query){
+                                        $query->select('id', 'name');
+                                    }
+                                    // First Method
+                                    // , 'event:id,name,category,location,event_date,start_time,meridiem,cover_photo,target_id'
+                                    // second method
+                                    //  => function($query){
+                                    //     $query->select('id', 'target_id', 'name', 'category', 'location', 'event_date', 'start_time', 'meridiem', 'cover_photo');
+                                    // }
+                                ])->where('user_id', auth()->user()->id)
+                                ->paginate(10);
+        
+        }
 
         return response()->json([
             'status' => 200,
-            'message' => 'Successfully added Education Information.',
+            'message' => 'Successfully got data.',
             'data' => $targets
         ]);
 
@@ -34,7 +54,7 @@ class TargetController extends Controller
 
         return response()->json([
             'status' => 200,
-            'message' => 'Successfully added Education Information.',
+            'message' => 'Successfully got interests.',
             'data' => $interests
         ]);  
     }
@@ -51,7 +71,7 @@ class TargetController extends Controller
         if($sub_interests){
             return response()->json([
                 'status' => 200,
-                'message' => 'Successfully added Education Information.',
+                'message' => 'Successfully got sub interests.',
                 'data' => $sub_interests
             ]);
         }else{
@@ -66,7 +86,6 @@ class TargetController extends Controller
     public function store(Request $req){
 
         $data = $req->all();
-
         $validate_data = [
                             'title' => 'required',
                             'type' => 'required',// 0 => public, 1 => private
@@ -81,10 +100,6 @@ class TargetController extends Controller
                             'invites' => 'array',
                         ];
 
-        if($data['incentive'] == 1){
-            $validate_data = array_merge($validate_data, ['incentive_prize' => 'required']);
-        }
-        
         $validate = Validator::make($data, $validate_data);
 
         if($validate->fails()){
@@ -94,20 +109,29 @@ class TargetController extends Controller
             ]);
         }
 
-        if($req->hasFile('photo'))
-        {
-            $original_name = $req->photo->getClientOriginalName();
-            $upload_file_name = time().$original_name;
-            $req->photo->move(public_path('/target_post_images'), $upload_file_name);
+        if($data['incentive'] == 1){
+            $validate_data = array_merge($validate_data, ['incentive_prize' => 'required']);
+        }
+
+        $validate = Validator::make($data, $validate_data);
+
+        if($validate->fails()){
+            return response()->json([
+                'status' => "failed",
+                'message' => $validate->errors()
+            ]);
         }
 
         $check_target_unique_id = random_int(0000000000000000, 9999999999999999);
-
         $target_unique_id = $this->check_unique_target_id($check_target_unique_id);
 
-        $user_id = auth()->user()->id;
         $target = new Target();
-        $target->user_id = $user_id;
+        if($req->has('organization_id')){
+            $target->organization_id = $data['organization_id'];
+        }else{
+            $user_id = auth()->user()->id;
+            $target->user_id = $user_id;
+        }
         $target->target_unique_id = $target_unique_id;
         $target->title = $data['title'];
         $target->type = $data['type'];
@@ -117,7 +141,12 @@ class TargetController extends Controller
         $target->from = $data['from'];
         $target->to = $data['to'];
         $target->description = $data['description'];
-        $target->photo = $upload_file_name;
+        if($req->hasFile('photo')){
+            $original_name = $req->photo->getClientOriginalName();
+            $upload_file_name = time().'_'.$original_name;
+            $req->photo->move(public_path('/target_post_images'), $upload_file_name);
+            $target->photo = $upload_file_name;
+        }
         $target->incentive = $data['incentive'];
 
         if($data["incentive"] == 1 && array_key_exists("incentive_prize", $data)){
@@ -127,14 +156,15 @@ class TargetController extends Controller
         if($target->save()){
 
             $target_id = $target->id;
-
-            $invites = $data['invites'];
-            foreach($invites as $invite){
-                $target_invite = New TargetInvite();
-                $target_invite->target_id = $target_id;
-                $target_invite->invited_user_id = $invite;
-                $target_invite->accepted = '0';
-                $target_invite->save();
+            if($req->has('invites')){
+                $invites = $data['invites'];
+                foreach($invites as $invite){
+                    $target_invite = New TargetInvite();
+                    $target_invite->target_id = $target_id;
+                    $target_invite->invited_user_id = $invite;
+                    $target_invite->accepted = '0';
+                    $target_invite->save();
+                }
             }
 
             return response()->json([
@@ -157,26 +187,26 @@ class TargetController extends Controller
             $this->check_unique_target_id($id);
         }
         return $id;
-    //     Target::get('target_unique_id')->pluck('target_unique_id')->toArray();
-    //     if (in_array($id, $target_unique_id_array)){
-    //         $target_unique_id = random_int(0000000000000000, 9999999999999999);
-    //         $this->check_unique_target_id($target_unique_id);
-    //     }
-    //     return $id;
+        //     Target::get('target_unique_id')->pluck('target_unique_id')->toArray();
+        //     if (in_array($id, $target_unique_id_array)){
+        //         $target_unique_id = random_int(0000000000000000, 9999999999999999);
+        //         $this->check_unique_target_id($target_unique_id);
+        //     }
+        //     return $id;
     }
 
-    public function edit(Request $req, $id){
+    public function edit($id){
         $target = Target::with('targetInvites')->find($id);
         if($target){
             return response()->json([
                 'status' => 200,
-                'message' => 'Success.',
+                'message' => 'Target found successfully.',
                 'data' => $target
             ]);
         }else{
             return response()->json([
                 'status' => 400,
-                'message' => 'Failed.',
+                'message' => 'Failed to find the target.',
             ]);  
         }
     }
@@ -198,13 +228,13 @@ class TargetController extends Controller
             'invites' => 'array',
         ];
 
-        // $validate = Validator::make($data, $validate_data);
-        // if($validate->fails()){
-        //     return response()->json([
-        //         'status' => "failed",
-        //         'message' => $validate->errors()
-        //     ]);
-        // }
+        $validate = Validator::make($data, $validate_data);
+        if($validate->fails()){
+            return response()->json([
+                'status' => "failed",
+                'message' => $validate->errors()
+            ]);
+        }
 
         if($data['incentive'] == 1){
             $validate_data = array_merge($validate_data, ['incentive_prize' => 'required']);
@@ -251,8 +281,12 @@ class TargetController extends Controller
         if($target->save()){
 
             if($req->has('invites')){
-                $invites = $data['invites'];
-                foreach($invites as $invite){
+
+                $target_invite = $data['invites'];
+                $old_target_invites = TargetInvite::where('target_id', $id)->pluck('invited_user_id')->toArray();
+                $new_invites = array_diff($target_invite, $old_target_invites);
+
+                foreach($new_invites as $invite){
                     $target_invite = New TargetInvite();
                     $target_invite->target_id = $id;
                     $target_invite->invited_user_id = $invite;

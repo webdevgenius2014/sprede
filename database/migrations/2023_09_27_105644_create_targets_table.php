@@ -14,16 +14,16 @@ return new class extends Migration
         Schema::create('targets', function (Blueprint $table) {
 
             $table->increments('id');
-            $table->integer('user_id')->unsigned();
-            $table->string('target_unique_id')->unique();
-            $table->string('title');
+            $table->integer('user_id')->unsigned()->nullable();
+            $table->string('target_unique_id')->unique()->nullable();
+            $table->string('title')->nullable();
             $table->boolean('type')->default('0'); // 0 => public, 1 => private 
-            $table->integer('interest_id')->unsigned();
-            $table->integer('sub_interest_id')->unsigned();
-            $table->string('target_units');
-            $table->string('from');
-            $table->string('to');
-            $table->string('description');
+            $table->integer('interest_id')->unsigned()->nullable();
+            $table->integer('sub_interest_id')->unsigned()->nullable();
+            $table->string('target_units')->nullable();
+            $table->string('from')->nullable();
+            $table->string('to')->nullable();
+            $table->longText('description')->nullable();
             $table->string('photo')->nullable();
             $table->boolean('incentive')->default('1'); // 0 => unincentivized, 1 => incentivized 
             $table->string('incentive_prize')->nullable();

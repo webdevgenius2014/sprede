@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('target_invites', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('target_id')->unsigned();
-            $table->integer('invited_user_id')->unsigned();
-            $table->boolean('accepted')->default('0');
+            $table->integer('target_id')->unsigned()->nullable();
+            $table->integer('invited_user_id')->unsigned()->nullable();
+            $table->boolean('accepted')->default('0')->nullable();
             $table->timestamps();
 
             $table->foreign('target_id')->references('id')->on('targets')->onDelete('cascade'); //On TAERGET delete this data will be also deleted

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Auth\EmploymentController;
 use App\Http\Controllers\Api\Auth\InterestController;
 use App\Http\Controllers\Api\Auth\EductionInfoController;
 use App\Http\Controllers\Api\Target\TargetController;
+use App\Http\Controllers\Api\Events\EventController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,18 +56,24 @@ Route::group([
     Route::post('/add-sub-interests', [InterestController::class, 'storeSubDefaultInterestByUser']);
     Route::post('/store-interests', [InterestController::class, 'storeUserInterest']);
     
-
     // Eductaion Info
     Route::post('store-education-info', [EductionInfoController::class, 'storeEduction']);
 
     //Target 
-    Route::get('all-targets', [TargetController::class, 'all']);
+    Route::get('all-targets', [TargetController::class, 'index']);
     Route::get('get-default-interests', [TargetController::class, 'interests']);
     Route::post('get-default-sub-interests', [TargetController::class, 'subInterests']);
     Route::post('/store-target', [TargetController::class, 'store']); 
     Route::get('/edit-target/{id}', [TargetController::class, 'edit']); 
     Route::get('/delete-target/{id}', [TargetController::class, 'destroy']); 
     Route::post('/update-target/{id}', [TargetController::class, 'update']); 
+
+    // Events
+    Route::post('/all-events', [EventController::class, 'index']);
+    Route::post('/store-event', [EventController::class, 'store']);
+    Route::get('/delete-event/{id}', [EventController::class, 'destroy']);
+    Route::get('/edit-event/{id}', [EventController::class, 'edit']); 
+    Route::post('/update-event/{id}', [EventController::class, 'update']); 
 
 });
 

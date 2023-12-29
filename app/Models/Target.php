@@ -10,6 +10,7 @@ class Target extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
+        'organization_id',
         'title',
         'type',
         'interest_id',
@@ -35,5 +36,9 @@ class Target extends Model
     
     public function targetInvites(){
         return $this->hasMany(TargetInvite::class);
+    }
+
+    public function event(){
+        return $this->hasMany(Event::class);
     }
 }
