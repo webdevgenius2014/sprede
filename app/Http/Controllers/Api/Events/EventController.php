@@ -40,6 +40,9 @@ class EventController extends Controller
     public function view(Request $req, $id){
         $event = Event::with(['target:id,target_unique_id'])->find($id);
         if($event){
+            if($event->event_activity){
+                $event->event_activity = unserialize($event->event_activity);
+            }
             return response()->json([
                 'status' => 200,
                 'message' => 'Successfully got data.',
