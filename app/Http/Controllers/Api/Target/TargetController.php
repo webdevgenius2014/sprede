@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Target;
 
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Interest;
@@ -17,29 +18,22 @@ class TargetController extends Controller
         $org_id = $req->org_id;
 
         if($org_id){
-            $targets = Target::with(['interest' => function ($query) {
-                $query->select('id', 'name');
-            }, 'sub_interest' => function($query){
-                $query->select('id', 'name');
-            }, 'user', 'event:id,name,category,location,event_date,start_time,meridiem,cover_photo,target_id'])
-            ->where('organization_id', $org_id)->paginate(10);
-        }else{
-            $targets = Target::select('id', 'interest_id', 'sub_interest_id', 'title', 'from', 'to', 'description', 'incentive_prize', 'target_unique_id')
-                            ->with(['interest' => function ($query) {
-                                        $query->select('id', 'name');
-                                    }, 'sub_interest' => function($query){
-                                        $query->select('id', 'name');
-                                    }
-                                    // First Method
-                                    // , 'event:id,name,category,location,event_date,start_time,meridiem,cover_photo,target_id'
-                                    // second method
-                                    //  => function($query){
-                                    //     $query->select('id', 'target_id', 'name', 'category', 'location', 'event_date', 'start_time', 'meridiem', 'cover_photo');
-                                    // }
-                                ])->where('user_id', auth()->user()->id)
+            // $targets = Target::with(['interest:id,name', 'sub_interest:id,name', 'user', 'event:id,name,category,location,event_date,start_time,meridiem,cover_photo,target_id'])            
+            //                     ->where('organization_id', $org_id)->paginate(10);
+            $targets = Target::select('id', 'interest_id', 'sub_interest_id', 'title', 'from', 'to', 'description', 'target_units')
+                                ->with(['interest:id,name', 'sub_interest:id,name'])
+                                ->where('organization_id', $org_id)
                                 ->paginate(10);
-        
-        }
+        }else{
+            $targets = Target::select('id', 'interest_id', 'sub_interest_id', 'title', 'from', 'to', 'description', 'target_units')
+                                ->with(['interest:id,name', 'sub_interest:id,name'])
+                                ->where('user_id', Auth::id())
+                                ->paginate(10);
+            
+            // $targets = Target::where('user_id', auth()->user()->id)
+            //                         ->with(['interest:id,name', 'sub_interest:id,name'])
+            //                         ->get(['id', 'interest_id', 'sub_interest_id', 'title', 'from', 'to', 'description', 'incentive_prize', 'target_unique_id']);
+        }       
 
         return response()->json([
             'status' => 200,
@@ -47,6 +41,42 @@ class TargetController extends Controller
             'data' => $targets
         ]);
 
+    }
+
+    public function view_more(Request $req, $id){
+        $target = Target::with(['interest:id,name', 'sub_interest:id,name'])
+                        ->find($id, ['title', 'description', 'interest_id', 'sub_interest_id', 'incentive_prize', 'target_units', 'to', 'from', 'target_unique_id', 'type']);
+        if($target){
+            return response()->json([
+                'status' => 200,
+                'message' => 'Target found successfully.',
+                'data' => $target
+            ]);
+        }else{
+            return response()->json([
+                'status' => 400,
+                'message' => 'Failed to find the target.',
+            ]);  
+        }
+    }
+
+    public function toggle_public_private_type(Request $req){
+        // 0 => public, 1 => private, default => 1
+        $data = $req->all();
+        $target = Target::find($data['target_id']);
+        $target->type = $data['type'];
+        if($target->save()){
+            return response()->json([
+                'status' => 200,
+                'message' => 'Target Type changed successfully.',
+                'data' => $target
+            ]);
+        }else{
+            return response()->json([
+                'status' => 400,
+                'message' => 'Failed to update target type.'
+            ]);
+        }
     }
 
     public function interests(){
@@ -310,13 +340,24 @@ class TargetController extends Controller
     }
 
     public function destroy($id){
-        $target = Target::find($id);
+        $target = Target::with(['event'])->find($id);
 
         if($target){
+
+            if($target->event){
+                foreach($target->event as $events){
+                    if($events->cover_photo){
+                        $delete_old_event_photo = public_path('/event_cover_images/');
+                        unlink($delete_old_event_photo.$events->cover_photo);
+                    }
+                }
+            }
+
             if($target->photo != null){
                 $delete_old_photo = public_path('/target_post_images/');
                 unlink($delete_old_photo.$target->photo);
             }
+
             if($target->delete()){
                 return response()->json([
                     'status' => 200,
@@ -328,10 +369,11 @@ class TargetController extends Controller
                     'message' => 'Failed to delete target.',
                 ]);
             }
+
         }else{
             return response()->json([
                 'status' => 400,
-                'message' => 'Failed.',
+                'message' => 'Failed to found target.',
             ]);  
         }
     }

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('user_id')->unsigned()->nullable();
             $table->string('target_unique_id')->unique()->nullable();
             $table->string('title')->nullable();
-            $table->boolean('type')->default('0'); // 0 => public, 1 => private 
+            $table->boolean('type')->default('1'); // 0 => public, 1 => private 
             $table->integer('interest_id')->unsigned()->nullable();
             $table->integer('sub_interest_id')->unsigned()->nullable();
             $table->string('target_units')->nullable();

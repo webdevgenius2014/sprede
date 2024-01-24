@@ -60,9 +60,11 @@ Route::group([
     Route::post('store-education-info', [EductionInfoController::class, 'storeEduction']);
 
     //Target 
-    Route::get('all-targets', [TargetController::class, 'index']);
-    Route::get('get-default-interests', [TargetController::class, 'interests']);
-    Route::post('get-default-sub-interests', [TargetController::class, 'subInterests']);
+    Route::post('/all-targets', [TargetController::class, 'index']);
+    Route::get('/view-more/{id}', [TargetController::class, 'view_more']);
+    Route::post('/type', [TargetController::class, 'toggle_public_private_type']);
+    Route::get('/get-default-interests', [TargetController::class, 'interests']);
+    Route::post('/get-default-sub-interests', [TargetController::class, 'subInterests']);
     Route::post('/store-target', [TargetController::class, 'store']); 
     Route::get('/edit-target/{id}', [TargetController::class, 'edit']); 
     Route::get('/delete-target/{id}', [TargetController::class, 'destroy']); 
@@ -70,6 +72,7 @@ Route::group([
 
     // Events
     Route::post('/all-events', [EventController::class, 'index']);
+    Route::get('/view-event/{id}', [EventController::class, 'view']);
     Route::post('/store-event', [EventController::class, 'store']);
     Route::get('/delete-event/{id}', [EventController::class, 'destroy']);
     Route::get('/edit-event/{id}', [EventController::class, 'edit']); 

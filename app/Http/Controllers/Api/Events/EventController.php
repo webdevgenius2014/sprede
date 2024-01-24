@@ -12,29 +12,43 @@ use Illuminate\Support\Facades\Validator;
 class EventController extends Controller
 {
     public function index(Request $req){
-        $events = new Event;
         $target_id = $req->target_id;
 
         $events = Event::where('target_id', $target_id)
-                        ->select('id', 'target_id', 'name', 'location', 'event_date', 'start_time', 'meridiem', 'cover_photo') 
+                        // ->select('id', 'target_id', 'name', 'location', 'event_date', 'start_time', 'meridiem', 'cover_photo') 
                         ->with('target:id,target_unique_id')
-                        ->get();
-       
+                        ->get(['id', 'target_id', 'name', 'location', 'event_date', 'start_time', 'meridiem', 'cover_photo']);
+        // dd(count($events->toArray()));
         if(count($events->toArray())){
             $events_array = $events->toArray();
             // foreach($events_array as $key => $e_a){
             //     $events_array[$key]['event_activity'] = unserialize($e_a['event_activity']);
             // }
             return response()->json([
-                'status' => "success",
+                'status' => 200,
                 'message' => 'Successfully got data.',
                 'data' => $events_array
             ]);
         }else{
             return response()->json([
-                'status' => "success",
-                'message' => 'No data found for the provided target id.',
-                'data' => $events
+                'status' => 400,
+                'message' => 'No data found for the provided target id.'
+            ]);
+        }
+    }
+
+    public function view(Request $req, $id){
+        $event = Event::with(['target:id,target_unique_id'])->find($id);
+        if($event){
+            return response()->json([
+                'status' => 200,
+                'message' => 'Successfully got data.',
+                'data' => $event
+            ]);
+        }else{
+            return response()->json([
+                'status' => 400,
+                'message' => 'No Event found.'
             ]);
         }
     }
@@ -226,7 +240,7 @@ class EventController extends Controller
 
         $event = Event::with(['target'])->find($id);
         $input = $req->all();
-        
+
         $rules = [
             'event_name' => 'required',
             'event_category' => 'required',
@@ -303,9 +317,10 @@ class EventController extends Controller
         // dd(public_path("event_cover_images\\").$event->cover_photo);
         if($req->has('event_cover_photo')){
 
-            //remove old one
-            unlink(public_path('event_cover_images\\').$event->cover_photo);
-
+            if($event->cover_photo){
+                //remove old one
+                unlink(public_path('event_cover_images\\').$event->cover_photo);
+            }
             $original_name = $req->event_cover_photo->getClientOriginalName();
             $upload_file_name = time()."_".$original_name;
             $req->event_cover_photo->move(public_path('/event_cover_images'), $upload_file_name);
