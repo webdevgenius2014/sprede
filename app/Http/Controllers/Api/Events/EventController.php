@@ -220,18 +220,21 @@ class EventController extends Controller
 
     public function edit($id){
         $event = Event::with(['target'])->find($id);
-        $event->event_activity = unserialize($event->event_activity);
-        if(count($event->toArray())){
-            return response()->json([
-                'status' => "success",
-                'message' => 'Successfully got data.',
-                'data' => $event
-            ]);
+        if($event){
+            if($event->event_activity){
+                $event->event_activity = unserialize($event->event_activity);
+            }
+            if(count($event->toArray())){
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Successfully got data.',
+                    'data' => $event
+                ]);
+            }
         }else{
             return response()->json([
-                'status' => "success",
+                'status' => 400,
                 'message' => 'No data found for this target_id.',
-                'data' => $event
             ]);
         }
     }
