@@ -1,0 +1,18 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "authenticate_user",
+    "main",
+    "user_module"
+  ],
+  "parent": {
+    "authenticate_user": "main",
+    "main": null,
+    "user_module": "main"
+  },
+  "order": [
+    "main",
+    "authenticate_user",
+    "user_module"
+  ]
+}
